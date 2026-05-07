@@ -14,7 +14,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -84,13 +83,7 @@ fun MoviesScreen(navController: NavController, viewModel: MovieViewModel) {
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold
                     )
-                    IconButton(onClick = { viewModel.fixSpecificMoviesImages() }) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Fix Images",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
+
                 }
                 
                 Spacer(Modifier.height(16.dp))
