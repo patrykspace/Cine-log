@@ -38,6 +38,24 @@ graph TD
     H <--> J
     J <--> I
 ```
+## 🗺️ Screen Map
+
+The screen map presents the main navigation flow of the CineLog mobile application. The dashboard acts as the central hub, allowing users to move between movie details, the movie explorer, library views, the add movie form, and the user profile.
+
+<p align="center">
+  <img src="screen-map.png" alt="CineLog Screen Map" width="900">
+</p>
+
+### Main Screens
+
+| Screen | Description |
+| :--- | :--- |
+| `DashboardScreen` | Main home screen with featured movie, statistics, and recently added titles. |
+| `MovieDetailScreen` | Detailed movie view with synopsis, rating, watch status, and user review. |
+| `MoviesScreen` | Movie explorer with search, filters, sorting, and grid/list content. |
+| `LibraryScreen` | Categorized lists: watched movies, to-watch titles, and favorites. |
+| `AddMovieScreen` | Form for adding a new movie with metadata, poster URL, rating, and trailer URL. |
+| `ProfileScreen` | User profile with movie statistics and genre distribution. |
 
 ### Key Architectural Pillars:
 - **Reactive Streams**: Using `Kotlin Flow` and `StateFlow` for real-time UI updates.
