@@ -15,7 +15,6 @@ import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -50,12 +49,7 @@ fun ProfileScreen(navController: NavController, viewModel: MovieViewModel) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("My Cinema Profile", fontWeight = FontWeight.Bold) },
-                actions = {
-                    IconButton(onClick = { /* Settings placeholder */ }) {
-                        Icon(Icons.Default.Settings, contentDescription = null)
-                    }
-                }
+                title = { Text("My Cinema Profile", fontWeight = FontWeight.Bold) }
             )
         }
     ) { padding ->
