@@ -22,7 +22,8 @@ import com.cinelog.data.AppDatabase
 import com.cinelog.data.MovieRepository
 import com.cinelog.ui.screens.*
 import com.cinelog.ui.theme.CineLogTheme
-import com.cinelog.viewmodel.MovieViewModel
+import com.cinelog.viewmodel.MovieDetailViewModel
+import com.cinelog.viewmodel.MovieListViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,23 +31,31 @@ class MainActivity : ComponentActivity() {
         
         val database = AppDatabase.getDatabase(this)
         val repository = MovieRepository(database.movieDao())
-        val viewModelFactory = object : ViewModelProvider.Factory {
+
+        val listViewModelFactory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return MovieViewModel(repository) as T
+                return MovieListViewModel(repository) as T
+            }
+        }
+
+        val detailViewModelFactory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return MovieDetailViewModel(repository) as T
             }
         }
 
         setContent {
-            val viewModel: MovieViewModel = viewModel(factory = viewModelFactory)
+            val listViewModel: MovieListViewModel = viewModel(factory = listViewModelFactory)
+            val detailViewModel: MovieDetailViewModel = viewModel(factory = detailViewModelFactory)
 
             // Seed only once: check actual DB count in a coroutine so there's no
             // race condition with the Flow emitting before data is ready.
             LaunchedEffect(Unit) {
-                viewModel.seedIfEmpty()
+                listViewModel.seedIfEmpty()
             }
 
             CineLogTheme {
-                CineLogApp(viewModel)
+                CineLogApp(listViewModel, detailViewModel)
             }
         }
     }
@@ -55,7 +64,7 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CineLogApp(viewModel: MovieViewModel) {
+fun CineLogApp(listViewModel: MovieListViewModel, detailViewModel: MovieDetailViewModel) {
     val navController = rememberNavController()
 
     Scaffold(
@@ -68,21 +77,39 @@ fun CineLogApp(viewModel: MovieViewModel) {
                 NavigationBar {
                     NavigationBarItem(
                         selected = currentRoute == Screen.Dashboard.route,
-                        onClick = { navController.navigate(Screen.Dashboard.route) },
+                        onClick = {
+                            navController.navigate(Screen.Dashboard.route) {
+                                popUpTo(Screen.Dashboard.route) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
                         icon = { Icon(Icons.Default.Home, contentDescription = null) },
                         label = { Text("Home") }
                     )
                     NavigationBarItem(
                         selected = currentRoute == Screen.Movies.route,
-                        onClick = { navController.navigate(Screen.Movies.route) },
+                        onClick = {
+                            navController.navigate(Screen.Movies.route) {
+                                popUpTo(Screen.Dashboard.route) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
                         icon = { Icon(Icons.Default.List, contentDescription = null) },
                         label = { Text("Movies") }
                     )
                     NavigationBarItem(
                         selected = currentRoute == Screen.Library.route,
-                        onClick = { navController.navigate(Screen.Library.route) },
+                        onClick = {
+                            navController.navigate(Screen.Library.route) {
+                                popUpTo(Screen.Dashboard.route) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
                         icon = {
-                            val toWatchCount = viewModel.toWatchMovies.collectAsState().value.size
+                            val toWatchCount = listViewModel.toWatchMovies.collectAsState().value.size
                             BadgedBox(
                                 badge = {
                                     if (toWatchCount > 0) {
@@ -97,7 +124,13 @@ fun CineLogApp(viewModel: MovieViewModel) {
                     )
                     NavigationBarItem(
                         selected = currentRoute == Screen.Profile.route,
-                        onClick = { navController.navigate(Screen.Profile.route) },
+                        onClick = {
+                            navController.navigate(Screen.Profile.route) {
+                                popUpTo(Screen.Dashboard.route) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
                         icon = { Icon(Icons.Default.Person, contentDescription = null) },
                         label = { Text("Profile") }
                     )
@@ -110,18 +143,18 @@ fun CineLogApp(viewModel: MovieViewModel) {
             startDestination = Screen.Dashboard.route,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable(Screen.Dashboard.route) { DashboardScreen(navController, viewModel) }
-            composable(Screen.Movies.route) { MoviesScreen(navController, viewModel) }
-            composable(Screen.Library.route) { LibraryScreen(navController, viewModel) }
-            composable(Screen.Profile.route) { ProfileScreen(navController, viewModel) }
+            composable(Screen.Dashboard.route) { DashboardScreen(navController, listViewModel) }
+            composable(Screen.Movies.route) { MoviesScreen(navController, listViewModel) }
+            composable(Screen.Library.route) { LibraryScreen(navController, listViewModel) }
+            composable(Screen.Profile.route) { ProfileScreen(navController, listViewModel) }
             composable(
                 route = Screen.MovieDetail.route,
                 arguments = listOf(navArgument("movieId") { type = NavType.IntType })
             ) { backStackEntry ->
                 val movieId = backStackEntry.arguments?.getInt("movieId") ?: 0
-                MovieDetailScreen(navController, viewModel, movieId)
+                MovieDetailScreen(navController, listViewModel, detailViewModel, movieId)
             }
-            composable(Screen.AddMovie.route) { AddMovieScreen(navController, viewModel) }
+            composable(Screen.AddMovie.route) { AddMovieScreen(navController, listViewModel) }
         }
     }
 }

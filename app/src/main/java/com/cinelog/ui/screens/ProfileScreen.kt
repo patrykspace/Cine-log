@@ -33,14 +33,14 @@ import androidx.navigation.NavController
 import com.cinelog.ui.components.GenreBarChart
 import com.cinelog.ui.components.RatingBarChart
 import com.cinelog.ui.components.StatMiniCard
-import com.cinelog.viewmodel.MovieViewModel
+import com.cinelog.viewmodel.MovieListViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(navController: NavController, viewModel: MovieViewModel) {
+fun ProfileScreen(navController: NavController, listViewModel: MovieListViewModel) {
     val context = LocalContext.current
-    val watchedMovies by viewModel.watchedMovies.collectAsState()
-    val movies by viewModel.allMovies.collectAsState()
+    val watchedMovies by listViewModel.watchedMovies.collectAsState()
+    val movies by listViewModel.allMovies.collectAsState()
     
     // Grouping for the charts (only watched movies)
     val genreCounts = watchedMovies.groupBy { it.genre }.mapValues { it.value.size.toFloat() }

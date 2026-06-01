@@ -31,12 +31,12 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.cinelog.ui.Screen
 import com.cinelog.ui.components.MovieGridItem
-import com.cinelog.viewmodel.MovieViewModel
+import com.cinelog.viewmodel.MovieListViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MoviesScreen(navController: NavController, viewModel: MovieViewModel) {
-    val movies by viewModel.allMovies.collectAsState()
+fun MoviesScreen(navController: NavController, listViewModel: MovieListViewModel) {
+    val movies by listViewModel.allMovies.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
     var selectedGenre by remember { mutableStateOf("All") }
     var sortBy by remember { mutableStateOf("Newest") }

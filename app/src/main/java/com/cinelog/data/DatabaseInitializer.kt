@@ -1,9 +1,9 @@
 package com.cinelog.data
 
-import com.cinelog.viewmodel.MovieViewModel
+import com.cinelog.viewmodel.MovieListViewModel
 
 object DatabaseInitializer {
-    fun seedDatabase(viewModel: MovieViewModel) {
+    fun seedDatabase(viewModel: MovieListViewModel) {
         val seedMovies = listOf(
             // ── Sci-Fi ──────────────────────────────────────────────────────────
             MovieEntity(

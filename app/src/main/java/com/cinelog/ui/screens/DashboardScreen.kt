@@ -31,14 +31,14 @@ import com.cinelog.ui.components.FeaturedMovieCard
 import com.cinelog.ui.components.MovieListItem
 import com.cinelog.ui.components.SectionHeader
 import com.cinelog.ui.components.StatCard
-import com.cinelog.viewmodel.MovieViewModel
+import com.cinelog.viewmodel.MovieListViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DashboardScreen(navController: NavController, viewModel: MovieViewModel) {
-    val movies by viewModel.allMovies.collectAsState()
-    val watchedMovies by viewModel.watchedMovies.collectAsState()
-    val toWatchMovies by viewModel.toWatchMovies.collectAsState()
+fun DashboardScreen(navController: NavController, listViewModel: MovieListViewModel) {
+    val movies by listViewModel.allMovies.collectAsState()
+    val watchedMovies by listViewModel.watchedMovies.collectAsState()
+    val toWatchMovies by listViewModel.toWatchMovies.collectAsState()
 
     Scaffold(
         floatingActionButton = {

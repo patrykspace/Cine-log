@@ -23,11 +23,11 @@ import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.cinelog.data.MovieEntity
-import com.cinelog.viewmodel.MovieViewModel
+import com.cinelog.viewmodel.MovieListViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddMovieScreen(navController: NavController, viewModel: MovieViewModel) {
+fun AddMovieScreen(navController: NavController, listViewModel: MovieListViewModel) {
     var title by remember { mutableStateOf("") }
     var year by remember { mutableStateOf("") }
     var genre by remember { mutableStateOf("Dramat") }
@@ -261,7 +261,7 @@ fun AddMovieScreen(navController: NavController, viewModel: MovieViewModel) {
                         review = if (isWatched) review else "",
                         trailerUrl = trailerUrl.trim()
                     )
-                    viewModel.insert(newMovie)
+                    listViewModel.insert(newMovie)
                     navController.navigateUp()
                 },
                 modifier = Modifier.fillMaxWidth().height(56.dp),

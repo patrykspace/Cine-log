@@ -1,329 +1,154 @@
-# 🎬 CineLog — Premiumowy Dziennik Filmowy
+# 🎬 CineLog — Premium Movie Journal
 
-![Android](https://img.shields.io/badge/Platforma-Android-3DDC84?logo=android&logoColor=white)
-![Kotlin](https://img.shields.io/badge/Język-Kotlin-7F52FF?logo=kotlin&logoColor=white)
-![Compose](https://img.shields.io/badge/UI-Jetpack_Compose-4285F4?logo=jetpackcompose&logoColor=white)
-![SQLite](https://img.shields.io/badge/Baza_Danych-Room-003B57?logo=sqlite&logoColor=white)
+[![Android](https://img.shields.io/badge/Platform-Android-3DDC84?logo=android&logoColor=white)](#)
+[![Kotlin](https://img.shields.io/badge/Language-Kotlin-7F52FF?logo=kotlin&logoColor=white)](#)
+[![Compose](https://img.shields.io/badge/UI-Jetpack_Compose-4285F4?logo=jetpackcompose&logoColor=white)](#)
+[![SQLite](https://img.shields.io/badge/Database-Room-003B57?logo=sqlite&logoColor=white)](#)
 
-CineLog to natywna aplikacja mobilna na system Android służąca do zarządzania własną biblioteką filmów. Umożliwia dodawanie, ocenianie, recenzowanie oraz organizowanie filmów w przejrzysty sposób. Projekt został wykonany z wykorzystaniem nowoczesnych technologii Android, takich jak **Jetpack Compose**, **Room** oraz architektura **MVVM**.
+CineLog is a professional, native Android application designed for high-end movie tracking. Built with a **Dark & Gold** premium aesthetic, it combines modern reactive programming with a sleek user experience.
 
 ---
 
-# 🏗️ Architektura Systemu
+## 🏗️ System Architecture
 
-Aplikacja została zbudowana zgodnie z architekturą **MVVM (Model-View-ViewModel)**, która rozdziela warstwę interfejsu użytkownika, logikę biznesową oraz warstwę danych.
+CineLog follows the **Clean Architecture** principles using the **MVVM (Model-View-ViewModel)** pattern with **two dedicated ViewModels** for strict separation of concerns, high testability, and a robust data flow.
 
 ```mermaid
 graph TD
-    subgraph UI [Warstwa Interfejsu]
-        A[MainActivity]
-        B[DashboardScreen]
-        C[MoviesScreen]
-        D[LibraryScreen]
-        E[MovieDetailScreen]
-        F[AddMovieScreen]
-        G[ProfileScreen]
+    subgraph UI_Layer [UI Layer - Jetpack Compose]
+        A[MainActivity] --> B[Navigation Graph]
+        B --> C[DashboardScreen]
+        B --> D[MoviesScreen]
+        B --> E[ProfileScreen]
+        B --> F[MovieDetailScreen]
+        B --> G2[LibraryScreen]
+        B --> G3[AddMovieScreen]
     end
 
-    subgraph ViewModel [Warstwa Logiki]
-        H[MovieViewModel]
+    subgraph Logic_Layer [State Management — 2 ViewModels]
+        G["MovieListViewModel\n(collections, insert, delete, seed)"]
+        G1["MovieDetailViewModel\n(favorite, watched, review, update)"]
     end
 
-    subgraph Data [Warstwa Danych]
-        I[MovieRepository]
+    subgraph Data_Layer [Data Persistence]
+        H[MovieRepository]
+        I[Room Database]
         J[MovieDao]
-        K[Room Database]
     end
 
-    B --> H
-    C --> H
-    D --> H
-    E --> H
-    F --> H
-    G --> H
-
-    H --> I
-    I --> J
-    J --> K
+    C & D & E & G2 & G3 <--> G
+    F <--> G
+    F <--> G1
+    G & G1 <--> H
+    H <--> J
+    J <--> I
 ```
 
-### Przepływ danych
+### ViewModel Responsibilities
 
-```text
-UI
- ↓
-MovieViewModel
- ↓
-MovieRepository
- ↓
-MovieDao
- ↓
-Room (SQLite)
-```
+| ViewModel | Responsibility | Used By |
+| :--- | :--- | :--- |
+| `MovieListViewModel` | Movie collections (`allMovies`, `watchedMovies`, `toWatchMovies`, `favoriteMovies`), `insert()`, `delete()`, database seeding & image fixes. | Dashboard, Movies, Library, Profile, AddMovie, MovieDetail (read-only) |
+| `MovieDetailViewModel` | Single-movie operations: `toggleFavorite()`, `toggleWatched()`, `addToWatch()`, `removeFromWatch()`, `saveReview()`, `update()`. | MovieDetail |
 
-Dane wracają do interfejsu w przeciwnym kierunku za pomocą `Flow` oraz `StateFlow`, dzięki czemu ekrany automatycznie odświeżają się po zmianach w bazie danych.
+## 🗺️ Screen Map
 
----
-
-# 🗺️ Mapa Ekranów
-
-Aplikacja składa się z kilku głównych ekranów połączonych za pomocą Compose Navigation.
+The screen map presents the main navigation flow of the CineLog mobile application. The dashboard acts as the central hub, allowing users to move between movie details, the movie explorer, library views, the add movie form, and the user profile. Navigation uses `popUpTo(Dashboard)` with `launchSingleTop` to prevent infinite backstack stacking — the hardware back button always returns to the Dashboard from any tab.
 
 <p align="center">
-  <img src="screen-map.png" alt="Mapa ekranów CineLog" width="900">
+  <img src="screen-map.png" alt="CineLog Screen Map" width="900">
 </p>
 
-## Główne ekrany
+### Main Screens
 
-| Ekran | Opis |
-|--------|--------|
-| `DashboardScreen` | Ekran główny z wyróżnionym filmem, statystykami i ostatnio dodanymi pozycjami. |
-| `MoviesScreen` | Przegląd wszystkich filmów wraz z wyszukiwarką, filtrowaniem i sortowaniem. |
-| `MovieDetailScreen` | Szczegółowy widok filmu zawierający opis, ocenę, trailer i recenzję użytkownika. |
-| `LibraryScreen` | Biblioteka użytkownika podzielona na filmy obejrzane, do obejrzenia i ulubione. |
-| `AddMovieScreen` | Formularz dodawania nowego filmu. |
-| `ProfileScreen` | Profil użytkownika wraz ze statystykami i wykresami. |
+| Screen | Description |
+| :--- | :--- |
+| `DashboardScreen` | Main home screen with featured movie, statistics, and recently added titles. |
+| `MovieDetailScreen` | Detailed movie view with synopsis, rating, watch status, and user review. |
+| `MoviesScreen` | Movie explorer with search, filters, sorting, and grid/list content. |
+| `LibraryScreen` | Categorized lists: watched movies, to-watch titles, and favorites. |
+| `AddMovieScreen` | Form for adding a new movie with metadata, poster URL, rating, and trailer URL. |
+| `ProfileScreen` | User profile with movie statistics and genre distribution. |
+
+### Key Architectural Pillars:
+- **Reactive Streams**: Using `Kotlin Flow` and `StateFlow` for real-time UI updates.
+- **Dependency Injection**: Constructor-based injection for the Repository and DAO.
+- **Declarative UI**: 100% Jetpack Compose implementation with reusable stateless components.
+- **Smart Navigation**: `popUpTo` + `launchSingleTop` + `restoreState` pattern prevents memory leaks from backstack stacking.
 
 ---
 
-# 📊 Architektura Bazy Danych
+## 📊 Database Architecture
 
-Aplikacja wykorzystuje lokalną bazę danych **Room**, która jest warstwą abstrakcji nad SQLite.
+The application utilizes a high-performance **Room Persistence Library** (SQLite abstraction). The schema is designed for quick metadata retrieval and efficient filtering.
 
-## Model danych
+### Entity Relationship Diagram (ERD)
 
 ```mermaid
 erDiagram
     MOVIES {
-        int id PK
-        string title
-        int year
-        string genre
-        double rating
-        int userRating
-        string director
-        string synopsis
-        string poster
-        string backdrop
-        boolean watched
-        boolean toWatch
-        boolean favorite
-        string review
-        string trailerUrl
+        int id PK "Auto-increment"
+        string title "Movie Title"
+        int year "Release Year"
+        string genre "Category (Action, Drama, etc.)"
+        double rating "Global/IMDb Score"
+        int userRating "Personal Score (1-10)"
+        string director "Director Name"
+        string synopsis "Plot Summary"
+        string poster "Poster Resource/URL"
+        string backdrop "Hero Resource/URL"
+        boolean watched "Watch Status Flag"
+        boolean toWatch "Watchlist Flag"
+        boolean favorite "Priority Flag"
+        string review "User Opinion text"
+        string trailerUrl "Video Source"
     }
 ```
 
-## Struktura encji MovieEntity
+### Data Schema Definition
 
-| Pole | Typ | Opis |
-|--------|--------|--------|
-| id | Int | Unikalny identyfikator filmu |
-| title | String | Tytuł filmu |
-| year | Int | Rok premiery |
-| genre | String | Gatunek filmu |
-| rating | Double | Ogólna ocena filmu |
-| userRating | Int | Ocena użytkownika |
-| director | String | Reżyser |
-| synopsis | String | Opis filmu |
-| poster | String | URL lub nazwa plakatu |
-| backdrop | String | URL lub nazwa tła |
-| watched | Boolean | Czy film został obejrzany |
-| toWatch | Boolean | Czy film znajduje się na liście do obejrzenia |
-| favorite | Boolean | Czy film jest ulubiony |
-| review | String | Recenzja użytkownika |
-| trailerUrl | String | Źródło trailera |
+| Field | Type | Constraint | Purpose |
+| :--- | :--- | :--- | :--- |
+| `id` | `Int` | `PRIMARY KEY` | Unique identifier for each entry. |
+| `title` | `String` | `NOT NULL` | The primary display name. |
+| `year` | `Int` | `DEFAULT 2024` | Temporal categorization. |
+| `genre` | `String` | `INDEXED` | Facilitates multi-genre filtering. |
+| `rating` | `Double` | `RANGE 0-10` | Reference quality score. |
+| `userRating` | `Int` | `OPTIONAL` | Personalized qualitative metric. |
+| `watched` | `Boolean` | `STATE` | Binary state for archive management. |
+| `backdrop` | `String` | `URL/PATH` | Asset for immersive Hero UI components. |
 
 ---
 
-# 🧠 Logika Aplikacji
+## 🎨 UI/UX Philosophy
 
-Najważniejszym elementem logiki jest `MovieViewModel`.
+The interface is driven by a **Dark & Gold** design system, utilizing glassmorphism and high-contrast typography to create a "Cinematic Premium" feel.
 
-Odpowiada on za:
-
-- pobieranie danych z Repository,
-- udostępnianie danych ekranom,
-- dodawanie nowych filmów,
-- aktualizowanie filmów,
-- oznaczanie filmów jako obejrzane,
-- dodawanie do ulubionych,
-- dodawanie do listy „Do obejrzenia”,
-- zapisywanie ocen i recenzji.
-
-Przykładowy przepływ dodawania filmu:
-
-```text
-AddMovieScreen
-    ↓
-MovieEntity
-    ↓
-MovieViewModel.insert()
-    ↓
-MovieRepository
-    ↓
-MovieDao
-    ↓
-Room Database
-```
+### Component System
+Located in `com.cinelog.ui.components`, our design system is modular:
+- **`StatsComponents`**: Dynamic charts (Genre/Rating distributions) and Stat Cards.
+- **`MovieComponents`**: Standardized cards (`MovieGridItem`, `MovieListItem`) and consistent headers.
+- **Animations**: Leveraging `Crossfade` and `AnimatedVisibility` for fluid transitions.
 
 ---
 
-# 🎨 Interfejs Użytkownika
+## 🛠️ Technology Stack
 
-Interfejs został wykonany w całości przy użyciu **Jetpack Compose**.
-
-Projekt wykorzystuje:
-
-- Material Design 3,
-- ciemny motyw aplikacji,
-- animacje Compose,
-- karty filmów,
-- wykresy statystyczne,
-- responsywny układ ekranów.
-
-## Komponenty wielokrotnego użytku
-
-Folder:
-
-```text
-ui/components
-```
-
-zawiera wspólne komponenty używane przez wiele ekranów:
-
-- `MovieGridItem`
-- `MovieListItem`
-- `FeaturedMovieCard`
-- `StatCard`
-- `StatMiniCard`
-- `GenreBarChart`
-- `RatingBarChart`
-
-Dzięki temu kod jest bardziej modularny i łatwiejszy w utrzymaniu.
+- **Language**: Kotlin 1.9+
+- **Asynchrony**: Coroutines, Flow, StateFlow.
+- **Local DB**: Room (SQLite) - Version 8.
+- **Image Engine**: Coil (with crossfade and error handling).
+- **Navigation**: Compose Navigation with Type-Safe routes.
+- **Video**: Internal Player with Hardware Acceleration.
 
 ---
 
-# 🎞️ Obsługa Trailerów i Multimediów
+## 🚀 Getting Started
 
-Aplikacja umożliwia odtwarzanie trailerów filmowych.
-
-## Lokalne pliki MP4
-
-Jeżeli:
-
-```text
-trailerUrl = "res/nazwa_trailera"
-```
-
-aplikacja wyszukuje plik w:
-
-```text
-res/raw/
-```
-
-i odtwarza go za pomocą:
-
-```text
-VideoView
-```
-
-## YouTube
-
-Jeżeli `trailerUrl` zawiera link YouTube, aplikacja osadza film przy pomocy:
-
-```text
-WebView
-```
-
-oraz mechanizmu YouTube Embed.
-
-## Obrazki
-
-Plakaty i tła filmów mogą być:
-
-- lokalnymi zasobami,
-- adresami URL pobieranymi z internetu.
-
-Do ich wyświetlania wykorzystywana jest biblioteka **Coil**.
+1. **Prerequisites**: Android Studio Ladybug | JDK 17.
+2. **Build**: Synced with Gradle 8.13.
+3. **Seed**: The database automatically seeds with high-quality entries on first launch via `DatabaseInitializer`.
 
 ---
 
-# 🛠️ Wykorzystane Technologie
-
-- Kotlin
-- Jetpack Compose
-- Material Design 3
-- Room Database
-- SQLite
-- ViewModel
-- Kotlin Coroutines
-- Flow / StateFlow
-- Compose Navigation
-- Coil
-- Android SDK 34
-- JDK 17
-
----
-
-# 🚀 Uruchomienie Projektu
-
-## Wymagania
-
-- Android Studio Ladybug lub nowsze
-- JDK 17
-- Android SDK 34
-
-## Instalacja
-
-1. Sklonuj repozytorium:
-
-```bash
-git clone https://github.com/patrykspace/Cine-log.git
-```
-
-2. Otwórz projekt w Android Studio.
-
-3. Poczekaj na synchronizację Gradle.
-
-4. Uruchom aplikację na emulatorze lub urządzeniu fizycznym.
-
-## Pierwsze uruchomienie
-
-Przy pierwszym uruchomieniu aplikacja:
-
-1. Tworzy lokalną bazę Room.
-2. Sprawdza, czy baza jest pusta.
-3. Jeżeli jest pusta, uruchamia `DatabaseInitializer`.
-4. Dodaje przykładowe filmy do bazy.
-5. Wyświetla ekran główny aplikacji.
-
----
-
-# 📂 Struktura Projektu
-
-```text
-com.cinelog
-│
-├── data
-│   ├── AppDatabase
-│   ├── MovieDao
-│   ├── MovieEntity
-│   ├── MovieRepository
-│   └── DatabaseInitializer
-│
-├── viewmodel
-│   └── MovieViewModel
-│
-└── ui
-    ├── MainActivity
-    ├── Screen
-    ├── screens
-    ├── components
-    └── theme
-```
-
----
-
-# ❤️ Autorzy
-
-Projekt został stworzony jako aplikacja do zarządzania własną biblioteką filmów z wykorzystaniem nowoczesnych technologii Android i architektury MVVM.
+Developed with ❤️ for the Cinema Community.

@@ -24,12 +24,13 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.cinelog.viewmodel.MovieViewModel
+import com.cinelog.viewmodel.MovieDetailViewModel
+import com.cinelog.viewmodel.MovieListViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MovieDetailScreen(navController: NavController, viewModel: MovieViewModel, movieId: Int) {
-    val movies by viewModel.allMovies.collectAsState()
+fun MovieDetailScreen(navController: NavController, listViewModel: MovieListViewModel, detailViewModel: MovieDetailViewModel, movieId: Int) {
+    val movies by listViewModel.allMovies.collectAsState()
     val movie = movies.find { it.id == movieId } ?: return
 
     val context = LocalContext.current
@@ -53,7 +54,7 @@ fun MovieDetailScreen(navController: NavController, viewModel: MovieViewModel, m
                 },
                 actions = {
                     IconButton(
-                        onClick = { viewModel.toggleFavorite(movie) },
+                        onClick = { detailViewModel.toggleFavorite(movie) },
                         colors = IconButtonDefaults.iconButtonColors(containerColor = Color.Black.copy(alpha = 0.5f))
                     ) {
                         Icon(
@@ -249,7 +250,7 @@ fun MovieDetailScreen(navController: NavController, viewModel: MovieViewModel, m
                 ) {
                     // Watched button
                     Button(
-                        onClick = { viewModel.toggleWatched(movie) },
+                        onClick = { detailViewModel.toggleWatched(movie) },
                         modifier = Modifier.weight(1f).height(52.dp),
                         colors = if (!movie.watched)
                             ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
@@ -273,8 +274,8 @@ fun MovieDetailScreen(navController: NavController, viewModel: MovieViewModel, m
                     // Add to Watch List button
                     OutlinedButton(
                         onClick = {
-                            if (movie.toWatch) viewModel.removeFromWatch(movie)
-                            else viewModel.addToWatch(movie)
+                            if (movie.toWatch) detailViewModel.removeFromWatch(movie)
+                            else detailViewModel.addToWatch(movie)
                         },
                         modifier = Modifier.weight(1f).height(52.dp),
                         shape = RoundedCornerShape(14.dp),
@@ -376,7 +377,7 @@ fun MovieDetailScreen(navController: NavController, viewModel: MovieViewModel, m
                                 }
                                 Button(
                                     onClick = {
-                                        viewModel.saveReview(movie, userRating, reviewText)
+                                        detailViewModel.saveReview(movie, userRating, reviewText)
                                         reviewEditing = false
                                     },
                                     modifier = Modifier.weight(1f)

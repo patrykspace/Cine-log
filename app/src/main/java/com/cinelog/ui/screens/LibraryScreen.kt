@@ -10,17 +10,17 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.cinelog.ui.Screen
 import com.cinelog.ui.components.MovieListItem
-import com.cinelog.viewmodel.MovieViewModel
+import com.cinelog.viewmodel.MovieListViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LibraryScreen(navController: NavController, viewModel: MovieViewModel) {
+fun LibraryScreen(navController: NavController, listViewModel: MovieListViewModel) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     val tabs = listOf("Watched", "To Watch", "Favorites")
 
-    val watchedMovies by viewModel.watchedMovies.collectAsState()
-    val toWatchMovies by viewModel.toWatchMovies.collectAsState()
-    val favoriteMovies by viewModel.favoriteMovies.collectAsState()
+    val watchedMovies by listViewModel.watchedMovies.collectAsState()
+    val toWatchMovies by listViewModel.toWatchMovies.collectAsState()
+    val favoriteMovies by listViewModel.favoriteMovies.collectAsState()
 
     Column(modifier = Modifier.fillMaxSize()) {
         TabRow(selectedTabIndex = selectedTabIndex) {

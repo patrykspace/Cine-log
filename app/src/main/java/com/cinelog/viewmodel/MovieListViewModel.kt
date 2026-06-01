@@ -9,7 +9,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class MovieViewModel(private val repository: MovieRepository) : ViewModel() {
+/**
+ * ViewModel responsible for movie **collection** operations:
+ * listing, filtering, inserting, deleting, and database seeding.
+ *
+ * Used by: DashboardScreen, MoviesScreen, LibraryScreen, ProfileScreen, AddMovieScreen.
+ */
+class MovieListViewModel(private val repository: MovieRepository) : ViewModel() {
 
     val allMovies: StateFlow<List<MovieEntity>> = repository.allMovies
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
@@ -27,38 +33,8 @@ class MovieViewModel(private val repository: MovieRepository) : ViewModel() {
         repository.insert(movie)
     }
 
-    fun update(movie: MovieEntity) = viewModelScope.launch {
-        repository.update(movie)
-    }
-
     fun delete(movie: MovieEntity) = viewModelScope.launch {
         repository.delete(movie)
-    }
-
-    fun toggleFavorite(movie: MovieEntity) = viewModelScope.launch {
-        repository.update(movie.copy(favorite = !movie.favorite))
-    }
-
-    fun toggleWatched(movie: MovieEntity) = viewModelScope.launch {
-        if (!movie.watched) {
-            // When marking as watched, remove from toWatch
-            repository.update(movie.copy(watched = true, toWatch = false))
-        } else {
-            // Unmarking as watched
-            repository.update(movie.copy(watched = false))
-        }
-    }
-
-    fun addToWatch(movie: MovieEntity) = viewModelScope.launch {
-        repository.update(movie.copy(toWatch = true, watched = false))
-    }
-
-    fun removeFromWatch(movie: MovieEntity) = viewModelScope.launch {
-        repository.update(movie.copy(toWatch = false))
-    }
-
-    fun saveReview(movie: MovieEntity, rating: Int, review: String) = viewModelScope.launch {
-        repository.update(movie.copy(userRating = rating, review = review))
     }
 
     /** Ensures specific movies have the correct artwork even if they were already in the DB. */
@@ -87,14 +63,14 @@ class MovieViewModel(private val repository: MovieRepository) : ViewModel() {
     /** Clears the database and re-seeds it from scratch. */
     fun resetDatabase() = viewModelScope.launch {
         repository.deleteAll()
-        com.cinelog.data.DatabaseInitializer.seedDatabase(this@MovieViewModel)
+        com.cinelog.data.DatabaseInitializer.seedDatabase(this@MovieListViewModel)
         repository.clearOtherBackdrops()
     }
 
     /** Called once at startup – seeds the database only if it is empty. */
     fun seedIfEmpty() = viewModelScope.launch {
         if (repository.getMovieCount() == 0) {
-            com.cinelog.data.DatabaseInitializer.seedDatabase(this@MovieViewModel)
+            com.cinelog.data.DatabaseInitializer.seedDatabase(this@MovieListViewModel)
         }
         // Always run fix to ensure latest URLs are applied to existing movies
         fixSpecificMoviesImages()
