@@ -152,7 +152,7 @@ fun CineLogApp(listViewModel: MovieListViewModel, detailViewModel: MovieDetailVi
                 arguments = listOf(navArgument("movieId") { type = NavType.IntType })
             ) { backStackEntry ->
                 val movieId = backStackEntry.arguments?.getInt("movieId") ?: 0
-                MovieDetailScreen(navController, listViewModel, detailViewModel, movieId)
+                MovieDetailScreen(navController, detailViewModel, movieId)
             }
             composable(Screen.AddMovie.route) { AddMovieScreen(navController, listViewModel) }
         }

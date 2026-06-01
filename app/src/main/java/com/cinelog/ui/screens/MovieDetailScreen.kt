@@ -25,12 +25,11 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.cinelog.viewmodel.MovieDetailViewModel
-import com.cinelog.viewmodel.MovieListViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MovieDetailScreen(navController: NavController, listViewModel: MovieListViewModel, detailViewModel: MovieDetailViewModel, movieId: Int) {
-    val movies by listViewModel.allMovies.collectAsState()
+fun MovieDetailScreen(navController: NavController, detailViewModel: MovieDetailViewModel, movieId: Int) {
+    val movies by detailViewModel.allMovies.collectAsState()
     val movie = movies.find { it.id == movieId } ?: return
 
     val context = LocalContext.current

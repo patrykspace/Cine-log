@@ -27,7 +27,7 @@ graph TD
 
     subgraph Logic_Layer [State Management — 2 ViewModels]
         G["MovieListViewModel\n(collections, insert, delete, seed)"]
-        G1["MovieDetailViewModel\n(favorite, watched, review, update)"]
+        G1["MovieDetailViewModel\n(favorite, watched, review, update, allMovies)"]
     end
 
     subgraph Data_Layer [Data Persistence]
@@ -37,7 +37,6 @@ graph TD
     end
 
     C & D & E & G2 & G3 <--> G
-    F <--> G
     F <--> G1
     G & G1 <--> H
     H <--> J
@@ -48,8 +47,8 @@ graph TD
 
 | ViewModel | Responsibility | Used By |
 | :--- | :--- | :--- |
-| `MovieListViewModel` | Movie collections (`allMovies`, `watchedMovies`, `toWatchMovies`, `favoriteMovies`), `insert()`, `delete()`, database seeding & image fixes. | Dashboard, Movies, Library, Profile, AddMovie, MovieDetail (read-only) |
-| `MovieDetailViewModel` | Single-movie operations: `toggleFavorite()`, `toggleWatched()`, `addToWatch()`, `removeFromWatch()`, `saveReview()`, `update()`. | MovieDetail |
+| `MovieListViewModel` | Movie collections (`allMovies`, `watchedMovies`, `toWatchMovies`, `favoriteMovies`), `insert()`, `delete()`, database seeding & image fixes. | Dashboard, Movies, Library, Profile, AddMovie |
+| `MovieDetailViewModel` | Single-movie operations and lookup (`allMovies`, `toggleFavorite()`, `toggleWatched()`, `addToWatch()`, `removeFromWatch()`, `saveReview()`, `update()`). | MovieDetail |
 
 ## 🗺️ Screen Map
 
